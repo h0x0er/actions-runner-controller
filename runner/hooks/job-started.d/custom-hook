@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -u
+
+# shellcheck source=runner/logger.sh
+source logger.sh
+
+log.debug "[StepSecurity] Custom Hook executed"
+
