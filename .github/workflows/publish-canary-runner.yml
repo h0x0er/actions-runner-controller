@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          repository: actions/actions-runner-controller
+          repository: h0x0er/actions-runner-controller
           path: arc/
           ref: master
 
