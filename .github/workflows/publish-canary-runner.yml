@@ -79,9 +79,9 @@ jobs:
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
 
-            ${{ env.DOCKER_USER }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
-            ${{ env.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
-            ${{ env.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
 
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
