@@ -10,8 +10,7 @@ hook_dir="/etc/arc/hooks/job-started.d"
 
 for hook in /etc/arc/hooks/job-started.d/*; do
   log.debug "Running hook: $hook"
-  full_hook="$hook_dir/$hook"
-  chmod +x $full_hook
-
-  exec $full_hook "$@"
+  chmod +x $hook
+  
+  exec $hook "$@"
 done
