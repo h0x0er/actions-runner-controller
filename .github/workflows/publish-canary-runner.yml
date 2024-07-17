@@ -2,7 +2,21 @@ name: Publish Runner Canary Image
 
 # This workflow anticipates a repository_dispatch event from the following workflow:
 # https://github.com/actions/actions-runner-controller/blob/master/.github/workflows/publish-canary.yaml
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      runner_version:
+        description: "Runner Version"
+        required: true
+        default: "2.300.2"
+      docker_version:
+        description: "Docker Version"
+        required: false
+        default: "20.10.12"
+      runner_container_hooks_version:
+        description: "Runner Container Hooks Version"
+        required: true
+        default: "0.2.0"
 
 # https://docs.github.com/en/rest/overview/permissions-required-for-github-apps
 permissions:
@@ -12,6 +26,9 @@ permissions:
 env:
   TARGET_ORG: h0x0er
   TARGET_REPO: actions-runner-controller
+  NAME: actions-runner-dind
+  os-name: ubuntu
+  os-version: 20.04
 
 jobs:
   canary-build:
@@ -35,16 +52,26 @@ jobs:
           path: arc/
           ref: master
 
+      - name: Export env vars
+        run: |
+          echo "SHA_SHORT=$(git -C $GITHUB_WORKSPACE/arc rev-parse --short HEAD)" >> $GITHUB_ENV
+          echo "LATEST_TAG_GHCR=ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:latest" >> $GITHUB_ENV
+
       # Considered unstable builds
       # See Issue #285, PR #286, and PR #323 for more information
       - name: Build and Push
         uses: docker/build-push-action@v3
         with:
-          context: ./arc
-          file: ./arc/Dockerfile
+          context: ./arc/runner
+          file: ./arc/runner/${{ env.NAME }}.${{env.os-name}}-${{ env.os-version }}.dockerfile
           platforms: linux/amd64
-          build-args: VERSION=canary-master
+          pull: true
           push: true
+          build-args: |
+            RUNNER_VERSION=${{ inputs.runner_version }}
+            DOCKER_VERSION=${{ inputs.docker_version }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
-            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
-
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
