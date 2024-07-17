@@ -47,5 +47,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}:canary
-          cache-from: type=gha,scope=arc-canary
-          cache-to: type=gha,mode=max,scope=arc-canary
+
