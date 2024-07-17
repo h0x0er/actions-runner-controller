@@ -26,7 +26,7 @@ permissions:
 env:
   TARGET_ORG: h0x0er
   TARGET_REPO: actions-runner-controller
-  NAME: actions-runner-dind
+  NAME: actions-runner
   os-name: ubuntu
   os-version: 20.04
 
