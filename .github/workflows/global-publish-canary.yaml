@@ -47,6 +47,7 @@ env:
 
 jobs:
   legacy-canary-build:
+    if: false
     name: Build and Publish Legacy Canary Image
     runs-on: ubuntu-latest
     env:
