@@ -38,6 +38,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Login to Docker Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PAT }}
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -72,6 +79,11 @@ jobs:
             DOCKER_VERSION=${{ inputs.docker_version }}
             RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
           tags: |
+
+            ${{ env.DOCKER_USER }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
+            ${{ env.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
+            ${{ env.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
+
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
