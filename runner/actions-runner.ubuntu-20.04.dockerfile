@@ -125,7 +125,7 @@ COPY docker-shim.sh /usr/local/bin/docker
 COPY hooks /etc/arc/hooks/
 
 # Making hooks executable for everyone
-RUN chmod ugo+x /etc/arc/hooks/job-started.d/*
+# RUN chmod ugo+x /etc/arc/hooks/job-started.d/*
 
 # Add the Python "User Script Directory" to the PATH
 ENV PATH="${PATH}:${HOME}/.local/bin/"
