@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -u
 
+source logger.sh
+
 log.debug "[StepSecurity] Custom Hook executed"
