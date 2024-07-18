@@ -18,6 +18,4 @@ step-log "workflow_job: ${GITHUB_JOB:-}"
 step-log "workflow_action: ${GITHUB_ACTION:-}"
 
 step-log "done"
-step-log "failing the run"
 
-exit 1
