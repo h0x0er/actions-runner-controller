@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 set -u
 
-exec echo "[StepSecurity] custom hook triggered"
 log.debug "[StepSecurity] Custom Hook executed"
