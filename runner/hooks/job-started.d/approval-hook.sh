@@ -18,8 +18,10 @@ ERROR_COUNT=0
 ERROR_RESP=""
 APPROVAL_SHOWED=0
 
-api_base="https://int.api.stepsecurity.io/v1"
-should_ci_run="$api_base/github/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/should-ci-run"
+CONSOLE_BASE="https://int1.stepsecurity.io"
+API_BASE="https://int.api.stepsecurity.io/v1"
+
+SHOULD_CI_RUN="$API_BASE/github/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/should-ci-run"
 
 
 function handleResponse(){
@@ -69,9 +71,9 @@ function printApprovalInfo(){
 
         step-log-notice "Waiting to be approved.."
 
-        step-log-notice "Approval URL: https://int1.stepsecurity.io/github/$GITHUB_REPOSITORY/commits/$GITHUB_COMMIT_SHA/approve-ci-run"
+        step-log-notice "Approval URL: $CONSOLE_BASE/github/$GITHUB_REPOSITORY/commits/$GITHUB_COMMIT_SHA/approve-ci-run"
 
-        # step-log-debug "$should_ci_run"
+        # step-log-debug "$SHOULD_CI_RUN"
 
         APPROVAL_SHOWED=1
 
@@ -92,7 +94,7 @@ function main(){
     while [[ $counter -ne $maxWait ]]; do
         # step-log-debug "[$counter] waiting.."
 
-        resp=$(curl -XGET -s "${should_ci_run}")
+        resp=$(curl -XGET -s "${SHOULD_CI_RUN}")
         handleResponse "${resp}" $?
 
         printApprovalInfo

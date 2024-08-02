@@ -65,7 +65,7 @@ jobs:
 
       # Considered unstable builds
       # See Issue #285, PR #286, and PR #323 for more information
-      - name: Build and Push
+      - name: (INT) Build and Push
         uses: docker/build-push-action@v3
         with:
           context: ./arc/runner
@@ -86,3 +86,33 @@ jobs:
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}
             ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}
+
+      - name: Configuring Approval hook for Prod
+        run: |
+          sed -i "s/int1/app/g" ./runner/hooks/job-started.d/approval-hook.sh
+          sed -i "s/int/agent/g" ./runner/hooks/job-started.d/approval-hook.sh
+
+          echo "Prod Changes:"
+          cat ./runner/hooks/job-started.d/approval-hook.sh | grep "https://"
+
+      - name: (PROD) Build and Push
+        uses: docker/build-push-action@v3
+        with:
+          context: ./arc/runner
+          file: ./arc/runner/${{ env.NAME }}.${{env.os-name}}-${{ env.os-version }}.dockerfile
+          platforms: linux/amd64
+          pull: true
+          push: true
+          build-args: |
+            RUNNER_VERSION=${{ inputs.runner_version }}
+            DOCKER_VERSION=${{ inputs.docker_version }}
+            RUNNER_CONTAINER_HOOKS_VERSION=${{ inputs.runner_container_hooks_version }}
+          tags: |
+
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}-prod
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-prod
+            ${{ secrets.DOCKER_USER }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}-prod
+
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:${{ env.os-name }}-${{ env.os-version }}-prod
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-prod
+            ghcr.io/${{ env.TARGET_ORG }}/${{ env.TARGET_REPO }}/${{ env.NAME }}:v${{ inputs.runner_version }}-${{ env.os-name }}-${{ env.os-version }}-${{ env.SHA_SHORT }}-prod
