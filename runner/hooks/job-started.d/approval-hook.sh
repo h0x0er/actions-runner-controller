@@ -1,33 +1,8 @@
 #!/usr/bin/env bash
-set -u
+set -uo pipefail
 
-__log() {
-  local color instant level
-
-  color=${1:?missing required <color> argument}
-  shift
-
-  level=${FUNCNAME[1]} # `main` if called from top-level
-  level=${level#log.} # substring after `log.`
-  level=${level^^} # UPPERCASE
-
-  if [[ ! -v "LOG_${level}_DISABLED" ]]; then
-    instant=$(date '+%F %T.%-3N' 2>/dev/null || :)
-
-    # https://no-color.org/
-    if [[ -v NO_COLOR ]]; then
-      printf -- '%s  %s --- %s\n' "$instant" "$level" "$*" 1>&2 || :
-    else
-      printf -- '\033[0;%dm%s  %s --- %s\033[0m\n' "$color" "$instant" "$level" "$*" 1>&2 || :
-    fi
-  fi
-}
-
-log.debug   () { __log 37 "$@"; } # white
-log.notice  () { __log 34 "$@"; } # blue
-log.warning () { __log 33 "$@"; } # yellow
-log.error   () { __log 31 "$@"; } # red
-log.success () { __log 32 "$@"; } # green
+# shellcheck source=../../logger.sh
+source logger.sh
 
 step-log-debug () { log.debug "[StepSecurity] $1"; }
 step-log-error () { log.error "[StepSecurity] $1"; }
@@ -36,6 +11,7 @@ step-log-warning  () { log.warning "[StepSecurity] $1"; }
 step-log-notice  () { log.notice "[StepSecurity] $1"; }
 
 
+MAX_WAIT=60 # MAX_WAIT * 5 = ACTUAL_WAIT seconds
 
 GITHUB_REPOSITORY=${GITHUB_REPOSITORY:-}
 GITHUB_RUN_ID=${GITHUB_RUN_ID:-}
@@ -59,7 +35,6 @@ function handleResponse(){
     echo "$resp" | grep -q "error"  > /dev/null
     err=$?
     if [[ $err -eq 0 ]] || [[ $lastStatus -ne 0 ]]; then
-        # step-log-error "error response received: $resp"
         ERROR_COUNT=$((ERROR_COUNT += 1))
         ERROR_RESP="$resp"
     fi
@@ -112,14 +87,12 @@ function main(){
 
     local resp
     local counter
-    local maxWait
 
     counter=0
-    maxWait=60 # wait for 5 minutes
     
+    step-log-notice "Approval hook triggered "
 
-    while [[ $counter -ne $maxWait ]]; do
-        # step-log-debug "[$counter] waiting.."
+    while [[ $counter -ne $MAX_WAIT ]]; do
 
         resp=$(curl -XGET -s "${SHOULD_CI_RUN}")
         handleResponse "${resp}" $?
