@@ -1,6 +1,33 @@
 #!/usr/bin/env bash
 set -u
-source logger.sh
+
+__log() {
+  local color instant level
+
+  color=${1:?missing required <color> argument}
+  shift
+
+  level=${FUNCNAME[1]} # `main` if called from top-level
+  level=${level#log.} # substring after `log.`
+  level=${level^^} # UPPERCASE
+
+  if [[ ! -v "LOG_${level}_DISABLED" ]]; then
+    instant=$(date '+%F %T.%-3N' 2>/dev/null || :)
+
+    # https://no-color.org/
+    if [[ -v NO_COLOR ]]; then
+      printf -- '%s  %s --- %s\n' "$instant" "$level" "$*" 1>&2 || :
+    else
+      printf -- '\033[0;%dm%s  %s --- %s\033[0m\n' "$color" "$instant" "$level" "$*" 1>&2 || :
+    fi
+  fi
+}
+
+log.debug   () { __log 37 "$@"; } # white
+log.notice  () { __log 34 "$@"; } # blue
+log.warning () { __log 33 "$@"; } # yellow
+log.error   () { __log 31 "$@"; } # red
+log.success () { __log 32 "$@"; } # green
 
 step-log-debug () { log.debug "[StepSecurity] $1"; }
 step-log-error () { log.error "[StepSecurity] $1"; }
